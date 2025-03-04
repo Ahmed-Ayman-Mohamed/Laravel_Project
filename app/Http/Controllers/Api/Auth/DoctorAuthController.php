@@ -57,7 +57,8 @@ class DoctorAuthController extends Controller
             Mail::to($user->email)->send(new MyTestMail(
                 $user->first_name,
                 $user->email,
-                $user->specialization
+                $user->specialization,
+                'Welcome Doctor'
             ));
 
             return $this->respondWithToken($token, $user);

@@ -15,14 +15,16 @@ class MyTestMail extends Mailable
     private string $name;
     private string $email;
     private string $specialization;
+    private string $message;
     /**
      * Create a new message instance.
      */
-    public function __construct(string $name, string $email, string $specialization)
+    public function __construct(string $name, string $email, string $message, string $specialization = "Dentist")
     {
         $this->name = $name;
         $this->email = $email;
         $this->specialization = $specialization;
+        $this->message = $message;
     }
 
     /**
@@ -45,7 +47,8 @@ class MyTestMail extends Mailable
             with: [
                 'name' => $this->name,
                 'email' => $this->email,
-                'specialization' => $this->specialization
+                'specialization' => $this->specialization,
+                'message' => $this->message,
             ]
         );
     }
