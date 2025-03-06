@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Api\Auth\DoctorAuthController;
+use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\DoctorController;
 use App\Http\Controllers\PostFolder\PostController;
 use Illuminate\Http\Request;
@@ -14,24 +14,24 @@ Route::get('/user', function (Request $request) {
 
 
 
-Route::group(['prefix' => 'doctor/auth'], function () {
-    Route::post('register', [DoctorAuthController::class, 'register']);
+Route::group(['prefix' => 'auth/{role?}'], function () {
+    Route::post('register', [AuthController::class, 'register']);
 });
 
-Route::group(['prefix' => 'doctor/auth'], function () {
-    Route::post('login', [DoctorAuthController::class, 'login']);
+Route::group(['prefix' => 'auth/{role?}'], function () {
+    Route::post('login', [AuthController::class, 'login']);
 });
 
 
 
-Route::group(['prefix' => 'doctor', 'middleware' => ['doctor_middleware:doctor_api']], function () {
+Route::group(['prefix' => 'doctor', 'middleware' => ['jwt_verifier:api', 'role_verifier:doctor']], function () {
     Route::get('me', [DoctorController::class, 'me']);
 
     Route::group(['prefix' => 'auth'], function () {
-        Route::post('logout', [DoctorAuthController::class, 'logout']);
+        Route::post('logout', [AuthController::class, 'logout']);
     });
 });
 
-Route::group(['prefix' => 'doctor', 'middleware' => ['doctor_middleware:api']], function () {
+Route::group(['middleware' => ['jwt_verifier:api', 'role_verifier:doctor']], function () {
     Route::get('posts', [PostController::class, 'getAllPosts']);
 });

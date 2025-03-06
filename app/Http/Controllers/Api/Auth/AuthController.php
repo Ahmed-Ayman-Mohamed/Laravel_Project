@@ -6,22 +6,23 @@ use App\Http\Controllers\Controller;
 use App\Mail\MyTestMail;
 use Illuminate\Http\Request;
 use App\Models\Doctor;
+use App\Models\Patient;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Tymon\JWTAuth\Exceptions\JWTException;
 
-class DoctorAuthController extends Controller
+class AuthController extends Controller
 {
-    public function register(Request $request)
+    public function register(Request $request, $role)
     {
         // Validate the incoming request
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'specialization' => 'string|max:255',
-            'email' => 'email|unique:doctors,email',
-            'password' => 'string|min:8|confirmed', // Ensure password is confirmed (password_confirmation field must match)
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed', // Ensure password is confirmed (password_confirmation field must match)
         ]);
 
         // If validation fails, return a 422 Unprocessable Entity response with the errors
@@ -29,16 +30,32 @@ class DoctorAuthController extends Controller
             return response()->json(['error' => $validator->errors()], 422);
         }
 
-        // Create the doctor (hash password)
-        $doctor = Doctor::create([
+        $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
-            'specialization' => $request->specialization,
             'email' => $request->email,
-            'password' => bcrypt($request->password), // Hashing the password
+            'password' => bcrypt($request->password),
+            'role' => $role,
         ]);
 
-        return response()->json(['message' => 'User Created'], 201);
+        // return response()->json(['User' => $user]);
+
+        if ($user->role == 'doctor') {
+            $doctor = Doctor::create([
+                'user_id' => $user->id,
+                'specialization' => $request->specialization,
+                'license_number' => $request->license_number,
+            ]);
+            $user = $doctor->user;
+        } else {
+            $patient = Patient::create([
+                'user_id' => $user->id,
+                'description' => $request->description,
+            ]);
+            $user = $patient->user;
+        }
+
+        return response()->json(['message' => 'User Created Successfully'], 201);
     }
 
 
@@ -46,20 +63,20 @@ class DoctorAuthController extends Controller
     {
         $credentials = $request->only('email', 'password');
         try {
-            if (! $token = Auth::guard('doctor_api')->attempt($credentials)) {
+            if (! $token = Auth::guard('api')->attempt($credentials)) {
                 return response()->json(['error' => 'Invalid credentials'], 401);
             }
 
             // Get the authenticated user.
-            $user = Auth::guard('doctor_api')->user();
+            $user = Auth::guard('api')->user();
 
             // Event
-            Mail::to($user->email)->send(new MyTestMail(
-                $user->first_name,
-                $user->email,
-                $user->specialization,
-                'Welcome Doctor'
-            ));
+            // Mail::to($user->email)->send(new MyTestMail(
+            //     $user->first_name,
+            //     $user->email,
+            //     $user->specialization,
+            //     'Welcome Doctor'
+            // ));
 
             return $this->respondWithToken($token, $user);
         } catch (JWTException $e) {

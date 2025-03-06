@@ -44,10 +44,10 @@ return [
             'driver' => 'jwt',
             'provider' => 'users',
         ],
-        'doctor_api' => [
-            'driver' => 'jwt',
-            'provider' => 'doctors',
-        ],
+        // 'doctor_api' => [
+        //     'driver' => 'jwt',
+        //     'provider' => 'doctors',
+        // ],
     ],
 
     /*
@@ -73,10 +73,10 @@ return [
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
 
-        'doctors' => [
-            'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\Doctor::class),
-        ],
+        // 'doctors' => [
+        //     'driver' => 'eloquent',
+        //     'model' => env('AUTH_MODEL', App\Models\Doctor::class),
+        // ],
 
         // 'users' => [
         //     'driver' => 'database',

@@ -3,24 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Model;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
 
-class doctor extends Authenticatable implements JWTSubject
+class Patient extends Authenticatable implements JWTSubject
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use Notifiable;
-
-    protected $table = 'doctors';
+    protected $table = 'patients';
 
     protected $fillable = [
-        'license_number',
         'user_id',
-        'specialization',
+        'description'
     ];
-
-
 
     public $timestamps = true;
 
