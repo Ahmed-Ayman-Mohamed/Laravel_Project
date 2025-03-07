@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('doctors', function (Blueprint $table) {
             $table->id();
             $table->string('specialization')->nullable();
-            $table->string('license_number')->nullable();
-
-
+            $table->string('degree')->nullable();
+            $table->string('university')->nullable();
+            $table->year('year_graduated')->nullable();
+            $table->string('location')->nullable();
+            $table->string('cv_file')->nullable(); // Stores CV file path
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 

@@ -15,15 +15,17 @@ class doctor extends Authenticatable implements JWTSubject
     protected $table = 'doctors';
 
     protected $fillable = [
-        'license_number',
         'user_id',
         'specialization',
+        'degree',
+        'university',
+        'year_graduated',
+        'location',
+        'license_number',
+        'cv_file',
     ];
 
-
-
-    public $timestamps = true;
-
+protected $hidden = ['created_at','updated_at'];
     public function user()
     {
         return $this->belongsTo(User::class);

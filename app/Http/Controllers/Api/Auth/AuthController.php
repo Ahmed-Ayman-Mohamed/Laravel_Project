@@ -15,55 +15,11 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class AuthController extends Controller
 {
-    public function register(Request $request, $role)
-    {
-        // Validate the incoming request
-        $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8|confirmed', // Ensure password is confirmed (password_confirmation field must match)
-        ]);
-
-        // If validation fails, return a 422 Unprocessable Entity response with the errors
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 422);
-        }
-
-        $user = User::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            'role' => $role,
-        ]);
-
-        // return response()->json(['User' => $user]);
-
-        if ($user->role == 'doctor') {
-            $doctor = Doctor::create([
-                'user_id' => $user->id,
-                'specialization' => $request->specialization,
-                'license_number' => $request->license_number,
-            ]);
-            $user = $doctor->user;
-        } else {
-            $patient = Patient::create([
-                'user_id' => $user->id,
-                'description' => $request->description,
-            ]);
-            $user = $patient->user;
-        }
-
-        return response()->json(['message' => 'User Created Successfully'], 201);
-    }
-
-
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
         try {
-            if (! $token = Auth::guard('api')->attempt($credentials)) {
+            if (! $token = Auth::attempt($credentials)) {
                 return response()->json(['error' => 'Invalid credentials'], 401);
             }
 
@@ -78,10 +34,25 @@ class AuthController extends Controller
             //     'Welcome Doctor'
             // ));
 
+            if($user->role === 'patient'){
+                $user = User::with('patient')->find($user->id);
+            }else{
+                $user = User::with('doctor')->find($user->id);
+            }
+
             return $this->respondWithToken($token, $user);
         } catch (JWTException $e) {
             return response()->json(['error' => 'Could not create token'], 500);
         }
+    }
+
+    public function me(Request $request)
+    {
+        $user = $request->user();
+        // $doctor = $user->doctor;
+        return response()->json([
+            'doctor' => $user,
+        ]);
     }
 
     public function logout()
