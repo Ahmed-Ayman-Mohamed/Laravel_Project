@@ -101,4 +101,11 @@ class AuthController extends Controller
             //'expires_in' => auth()->factory()->getTTL() * 60 // Token expiration time in seconds
         ]);
     }
+    public function me(Request $request)
+    {
+        $user = $request->user();
+        return response()->json([
+            'user' => $user,
+        ]);
+    }
 }
