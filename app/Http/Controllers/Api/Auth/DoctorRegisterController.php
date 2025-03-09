@@ -32,7 +32,7 @@ class DoctorRegisterController extends Controller
             'university' => $request->university,
             'year_graduated' => $request->year_graduated,
             'location' => $request->location,
-            'cv_file' => null, // Save file path in the database
+            // 'cv_file' => null, // Save file path in the database
         ]);
         $doctor = User::with('doctor')->find($user->id);
         return response()->json([

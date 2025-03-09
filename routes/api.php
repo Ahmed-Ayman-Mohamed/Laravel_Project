@@ -30,10 +30,10 @@ Route::group(['prefix' => 'auth'], function () {
 });
 
 
-
 Route::group(['middleware' => ['jwt_verifier:api']], function () {
     Route::get('users/me', [AuthController::class, 'me']);
-
+    Route::get('doctors',[DoctorController::class,'getAllDoctors']);
+    Route::get('patients',[DoctorController::class,'getAllPatients']);
     Route::group(['prefix' => 'auth'], function () {
         Route::post('logout', [AuthController::class, 'logout']);
     });
