@@ -7,10 +7,14 @@ use App\Http\Requests\PatientRegisterRequest;
 use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\ApiResponseTrait; // Import the trait
 
 class PatientRegisterController extends Controller
 {
-    public function register(PatientRegisterRequest $request){
+    use ApiResponseTrait;
+
+    public function register(PatientRegisterRequest $request)
+    {
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
@@ -23,10 +27,9 @@ class PatientRegisterController extends Controller
             'user_id' => $user->id,
             'description' => $request->description,
         ]);
+
         $patient = User::with('patient')->find($user->id);
-        return response()->json([
-            'message' => 'Doctor registered successfully',
-            'patient' => $patient,
-        ], 201);
+
+        return $this->successResponse($patient, 'Patient registered successfully', 201);
     }
 }

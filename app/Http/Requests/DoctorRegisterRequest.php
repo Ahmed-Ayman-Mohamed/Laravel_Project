@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests;
 
+use App\ApiResponseTrait;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class DoctorRegisterRequest extends RegisterRequest
 {
+    use ApiResponseTrait;
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -39,5 +42,10 @@ class DoctorRegisterRequest extends RegisterRequest
             // 'cv_file.mimes' => 'CV must be a PDF, DOC, or DOCX file.',
             // 'cv_file.max' => 'CV file size must not exceed 2MB.',
         ]);
+    }
+    public function failedValidation(\Illuminate\Contracts\Validation\Validator $validator){
+        throw new HttpResponseException(
+            $this->validationErrorResponse($validator->errors()->toArray())
+        );
     }
 }

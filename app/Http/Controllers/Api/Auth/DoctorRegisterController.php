@@ -8,10 +8,14 @@ use App\Models\User;
 use App\Models\Doctor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\ApiResponseTrait; // Import the trait
 
 class DoctorRegisterController extends Controller
 {
-    public function register(DoctorRegisterRequest $request){
+    use ApiResponseTrait;
+
+    public function register(DoctorRegisterRequest $request)
+    {
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
@@ -34,10 +38,9 @@ class DoctorRegisterController extends Controller
             'location' => $request->location,
             // 'cv_file' => null, // Save file path in the database
         ]);
+
         $doctor = User::with('doctor')->find($user->id);
-        return response()->json([
-            'message' => 'Doctor registered successfully',
-            'doctor' => $doctor,
-        ], 201);
-    } 
+
+        return $this->successResponse($doctor, 'Doctor registered successfully', 201);
+    }
 }

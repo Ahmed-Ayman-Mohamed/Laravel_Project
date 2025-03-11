@@ -7,9 +7,12 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use App\ApiResponseTrait; // Import the trait
 
 class JwtMiddleware
 {
+    use ApiResponseTrait;
+
     /**
      * Handle an incoming request.
      *
@@ -21,16 +24,16 @@ class JwtMiddleware
 
         $token = $request->bearerToken();
         if (!$token) {
-            return response()->json(['message' => 'Token not provided'], Response::HTTP_UNAUTHORIZED);
+            return $this->unauthorizedResponse('Token not provided');
         }
 
         try {
             // Attempt to authenticate the token
             if (!JWTAuth::parseToken()->authenticate()) {
-                return response()->json(['message' => 'Invalid token'], Response::HTTP_UNAUTHORIZED);
+                return $this->unauthorizedResponse('Invalid token');
             }
         } catch (JWTException $e) {
-            return response()->json(['message' => 'Token is invalid or expired'], Response::HTTP_UNAUTHORIZED);
+            return $this->unauthorizedResponse('Token is invalid or expired');
         }
 
         // If the token is valid, pass control to the next middleware/handler
