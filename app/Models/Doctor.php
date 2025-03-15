@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
 
-class doctor extends Authenticatable implements JWTSubject
+class Doctor extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use Notifiable;
@@ -25,7 +25,7 @@ class doctor extends Authenticatable implements JWTSubject
         'cv_file',
     ];
 
-protected $hidden = ['created_at','updated_at'];
+    protected $hidden = ['created_at', 'updated_at'];
     public function user()
     {
         return $this->belongsTo(User::class);

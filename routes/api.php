@@ -14,15 +14,17 @@ Route::get('/user', function (Request $request) {
 
 
 
-
+Route::get('/hi', function () {
+    return 'Hello';
+});
 
 // Route::group(['prefix' => 'auth/{role?}'], function () {
 //     Route::post('register', [AuthController::class, 'register']);
 // });
 
-Route::group(['prefix'=> 'auth'], function () {
-    Route::post('patient/register',[PatientRegisterController::class,'register']);
-    Route::post('doctor/register',[DoctorRegisterController::class,'register']);
+Route::group(['prefix' => 'auth'], function () {
+    Route::post('patient/register', [PatientRegisterController::class, 'register']);
+    Route::post('doctor/register', [DoctorRegisterController::class, 'register']);
 });
 
 Route::group(['prefix' => 'auth'], function () {
@@ -32,12 +34,11 @@ Route::group(['prefix' => 'auth'], function () {
 
 Route::group(['middleware' => ['jwt_verifier:api']], function () {
     Route::get('users/me', [AuthController::class, 'me']);
-    Route::get('doctors',[DoctorController::class,'getAllDoctors']);
-    Route::group(['middleware' => 'role_verifier:doctor'],function(){
-        Route::get('patients',[DoctorController::class,'getAllPatients']);
+    Route::get('doctors', [DoctorController::class, 'getAllDoctors']);
+    Route::group(['middleware' => 'role_verifier:doctor'], function () {
+        Route::get('patients', [DoctorController::class, 'getAllPatients']);
     });
     Route::group(['prefix' => 'auth'], function () {
         Route::post('logout', [AuthController::class, 'logout']);
     });
 });
-
