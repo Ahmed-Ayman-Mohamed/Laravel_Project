@@ -21,9 +21,14 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        Post::create([
-            'title' => 'ahmed',
-            'body' => 'Hello World'
+        // Post::create([
+        //     'title' => 'ahmed',
+        //     'body' => 'Hello World'
+        // ]);
+
+        $this->call([
+            SpecializationSeeder::class,  // Seed specializations first
+            DoctorSeeder::class,          // Seed doctors after
         ]);
     }
 }

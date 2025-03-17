@@ -9,6 +9,7 @@ use App\Models\Doctor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\ApiResponseTrait; // Import the trait
+use App\Models\Specialization;
 
 class DoctorRegisterController extends Controller
 {
@@ -16,6 +17,8 @@ class DoctorRegisterController extends Controller
 
     public function register(DoctorRegisterRequest $request)
     {
+        // return response()->json(['message' => $request->input('myspec')]);
+
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
@@ -30,7 +33,7 @@ class DoctorRegisterController extends Controller
         //     $cvFilePath = null;
         // }
 
-        Doctor::create([
+        $doctor = Doctor::create([
             'user_id' => $user->id,
             'degree' => $request->degree,
             'university' => $request->university,
@@ -39,8 +42,40 @@ class DoctorRegisterController extends Controller
             // 'cv_file' => null, // Save file path in the database
         ]);
 
-        $doctor = User::with('doctor')->find($user->id);
 
-        return $this->successResponse($doctor, 'Doctor registered successfully', 201);
+        // Check if specializations are provided in the request
+        if ($request->has('myspec')) {
+
+            $specialization_names = $request->post('myspec');
+
+            if (strpos($specialization_names, ',') !== false) {
+                $specialization_names = explode(',', $specialization_names);
+            } else {
+                // If it's a single name, make it an array with one element
+                $specialization_names = [$specialization_names];
+            }
+
+            // $all_specializations = explode(',', $request->input('myspec'));
+            $specialization_ids = [];
+
+            foreach ($specialization_names as $specialization) {
+                $_specialization = Specialization::firstOrCreate([
+                    'name' => $specialization,
+                ]);
+
+                $specialization_ids[] = $_specialization->id;
+            }
+
+            $doctor->specializations()->sync($specialization_ids);  // Using sync to update the relationship
+        }
+
+        // $user = User::with('doctor')->find($user->id);
+
+        $result = array_merge($doctor->user->toArray(), [
+            'doctor_id' => $doctor->id,
+            'specializations' => $doctor->specializations->pluck('name')->toArray(),
+        ]);
+
+        return $this->successResponse($result, 'Doctor registered successfully', 201);
     }
 }

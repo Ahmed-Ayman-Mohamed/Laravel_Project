@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use App\ApiResponseTrait; // Import the trait
+use App\Http\Resources\DoctorResource;
+use App\Http\Resources\PatientResource;
+use PatientController;
 
 class AuthController extends Controller
 {
@@ -37,12 +40,14 @@ class AuthController extends Controller
             // ));
 
             if ($user->role === 'patient') {
-                $user = User::with('patient')->find($user->id);
+                //$user = User::with('patient')->find($user->id);
+                return $this->respondWithToken($token, new PatientResource($user));
             } else {
-                $user = User::with('doctor')->find($user->id);
+                //$user = User::with('doctor')->find($user->id);
+                return $this->respondWithToken($token, new DoctorResource($user));
             }
 
-            return $this->respondWithToken($token, $user);
+            return $this->errorResponse();
         } catch (JWTException $e) {
             return $this->errorResponse('Could not create token', 500);
         }

@@ -20,7 +20,8 @@ class DoctorRegisterRequest extends RegisterRequest
     public function rules(): array
     {
         return array_merge(parent::rules(), [
-            'specialization' => ['required', 'string', 'max:255'],
+            // 'specialization' => ['required', 'string', 'max:255'],
+            'myspec' => ['required', 'string', 'max:255'],
             'degree' => ['required', 'string', 'max:255'],
             'university' => ['required', 'string', 'max:255'],
             'year_graduated' => ['nullable', 'digits:4', 'integer', 'min:1900', 'max:' . date('Y')],
@@ -43,7 +44,8 @@ class DoctorRegisterRequest extends RegisterRequest
             // 'cv_file.max' => 'CV file size must not exceed 2MB.',
         ]);
     }
-    public function failedValidation(\Illuminate\Contracts\Validation\Validator $validator){
+    public function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
+    {
         throw new HttpResponseException(
             $this->validationErrorResponse($validator->errors()->toArray())
         );

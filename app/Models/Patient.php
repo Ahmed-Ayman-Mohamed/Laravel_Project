@@ -14,10 +14,15 @@ class Patient extends Authenticatable implements JWTSubject
         'user_id',
         'description'
     ];
-    protected $hidden = ['created_at','updated_at'];
+    protected $hidden = ['created_at', 'updated_at'];
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
     }
 
     /**

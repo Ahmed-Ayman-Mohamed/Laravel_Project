@@ -23,13 +23,17 @@ class PatientRegisterController extends Controller
             'role' => 'patient',
         ]);
 
-        Patient::create([
+        $patient = Patient::create([
             'user_id' => $user->id,
             'description' => $request->description,
         ]);
 
-        $patient = User::with('patient')->find($user->id);
+        // $patient = User::with('patient')->find($user->id);
 
-        return $this->successResponse($patient, 'Patient registered successfully', 201);
+        $result = array_merge($patient->user->toArray(), [
+            'patient_id' => $patient->id,
+        ]);
+
+        return $this->successResponse($result, 'Patient registered successfully', 201);
     }
 }

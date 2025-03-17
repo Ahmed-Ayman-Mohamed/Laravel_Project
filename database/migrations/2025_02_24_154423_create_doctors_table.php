@@ -18,9 +18,9 @@ return new class extends Migration
             $table->string('university')->nullable();
             $table->year('year_graduated')->nullable();
             $table->string('location')->nullable();
-            $table->string('cv_file')->nullable(); // Stores CV file path
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->string('cv_file')->nullable(); // Stores CV file path
 
             $table->timestamps();
         });
