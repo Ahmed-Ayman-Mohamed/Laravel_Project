@@ -25,7 +25,12 @@ class DoctorFactory extends Factory
             'university' => $this->faker->company,  // Random university name
             'year_graduated' => $this->faker->year,  // Random graduation year
             'location' => $this->faker->city,  // Random city name as location
-            'user_id' => User::factory(),  // Associate a user to the doctor using the User factory
+            'user_id' => User::factory()->create([
+                'role' => 'doctor'
+            ]),  // Associate a user to the doctor using the User factory
+            // 'user_role' => function(array $attributes){
+            //     User::find($attributes['user_id'])->role;
+            // }
         ];
     }
 }

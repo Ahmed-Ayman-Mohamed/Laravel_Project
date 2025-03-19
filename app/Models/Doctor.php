@@ -42,6 +42,11 @@ class Doctor extends Authenticatable implements JWTSubject
         return $this->hasMany(Review::class);
     }
 
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
+    }
+
     public function averageRating()
     {
         return $this->reviews()->avg('rating');

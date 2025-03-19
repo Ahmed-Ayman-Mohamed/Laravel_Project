@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Auth\PatientRegisterController;
 use App\Http\Controllers\Api\DoctorController;
 use App\Http\Controllers\PostFolder\PostController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SpecializationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -39,6 +40,7 @@ Route::get('patients', [DoctorController::class, 'getAllPatients']);
 Route::get('doctors', [DoctorController::class, 'getAllDoctors']);
 
 
+
 Route::group(['middleware' => ['jwt_verifier:api']], function () {
     Route::get('users/me', [AuthController::class, 'me']);
     Route::get('specialization', [DoctorController::class, 'userSpecialization']);
@@ -50,6 +52,7 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
         // Specializations
         Route::get('specializations', [SpecializationController::class, 'getAllSpecialization']);
         Route::get('get_doctors_by_specialization_name', [SpecializationController::class, 'getDoctorBySpecializationName']);
+        Route::post('schedules/create', [ScheduleController::class, 'store']);
     });
 
 

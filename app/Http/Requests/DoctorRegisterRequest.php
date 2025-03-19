@@ -32,7 +32,7 @@ class DoctorRegisterRequest extends RegisterRequest
     public function messages(): array
     {
         return array_merge(parent::messages(), [
-            'specialization.required' => 'Specialization is required.',
+            // 'specialization.required' => 'Specialization is required.',
             'degree.required' => 'Degree is required.',
             'university.required' => 'University name is required.',
             // 'year_graduated.required' => 'Year graduated is required.',
