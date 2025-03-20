@@ -23,7 +23,13 @@ class Doctor extends Authenticatable implements JWTSubject
         'year_graduated',
         'location',
         'license_number',
+        'price',
         'cv_file',
+    ];
+
+    protected $appends = [
+        'reviews_count',
+        'average_rating',
     ];
 
     protected $hidden = ['user_id', 'created_at', 'updated_at'];
@@ -41,16 +47,26 @@ class Doctor extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Review::class);
     }
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
 
     public function schedules()
     {
         return $this->hasMany(Schedule::class);
     }
 
-    public function averageRating()
+    public function getAverageRatingAttribute()
     {
-        return $this->reviews()->avg('rating');
+        return round($this->reviews()->avg('rating'), 2);
     }
+
+    public function getReviewsCountAttribute()
+    {
+        return $this->reviews()->count();
+    }
+
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
      *
@@ -69,5 +85,30 @@ class Doctor extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    public static function filter($filters)
+    {
+        $query = self::query();
+
+        if (isset($filters['review_rating'])) {
+            $query->whereHas('reviews', function ($query) use ($filters) {
+                $query->selectRaw('AVG(rating) as average_rating')
+                    ->groupBy('doctor_id')
+                    ->having('average_rating', '>=', $filters['review_rating']);
+            });
+        }
+
+        // Filter by minimum price
+        if (isset($filters['min_price'])) {
+            $query->where('price', '>=', $filters['min_price']);
+        }
+
+        // Filter by maximum price
+        if (isset($filters['max_price'])) {
+            $query->where('price', '<=', $filters['max_price']);
+        }
+
+        return $query;
     }
 }

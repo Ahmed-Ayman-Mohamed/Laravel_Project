@@ -28,6 +28,11 @@ class Patient extends Authenticatable implements JWTSubject
         return $this->hasMany(Review::class);
     }
 
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
      *

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Doctor;
 use App\Models\Patient;
+use App\Models\Review;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -18,10 +19,14 @@ class ReviewSeeder extends Seeder
         $patients = Patient::all();
 
 
-        // $patients->each(function($patient){
-        //     Review::factory()
-        //     ->count(3)
-        //     ->for($patient)
-        // })
+        $doctors->each(function ($doctor) use ($patients) {
+            $patients->each(function ($patient) use ($doctor) {
+                Review::factory()
+                    ->count(1) // Generate 3 reviews for each patient-doctor pair
+                    ->for($patient) // Associate the review with the current patient
+                    ->for($doctor)  // Associate the review with the current doctor
+                    ->create();
+            });
+        });
     }
 }

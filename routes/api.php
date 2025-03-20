@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\DoctorRegisterController;
 use App\Http\Controllers\Api\Auth\PatientRegisterController;
 use App\Http\Controllers\Api\DoctorController;
+use App\Http\Controllers\Api\PatientController;
+use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\PostFolder\PostController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ScheduleController;
@@ -36,14 +38,43 @@ Route::group(['prefix' => 'auth'], function () {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Route::get('patients', [DoctorController::class, 'getAllPatients']);
 Route::get('doctors', [DoctorController::class, 'getAllDoctors']);
+Route::get('doctors/filter', [DoctorController::class, 'filter']);
+
+
+
+
+
+
 
 
 
 Route::group(['middleware' => ['jwt_verifier:api']], function () {
+
+
     Route::get('users/me', [AuthController::class, 'me']);
     Route::get('specialization', [DoctorController::class, 'userSpecialization']);
+
+
+
+
+
 
 
 
@@ -56,13 +87,29 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
     });
 
 
-    // Reviews
+
+
+
+
+
+
+
+
+    // Patient
     Route::group(['middleware' => 'role_verifier:patient'], function () {
         Route::get('doctors/{id}/reviews', [ReviewController::class, 'getDoctorReviews']);
         Route::get('doctors/{id}/reviews/create', [ReviewController::class, 'store']);
         Route::post('reviews/{id}/update', [ReviewController::class, 'update']);
         Route::post('reviews/{id}/delete', [ReviewController::class, 'destroy']);
+
+
+        // Patient Appointments
+        Route::get('doctors/{id}/details', [DoctorController::class, 'doctorDetailsForBooking']);
+        Route::get('doctors/{id}/appointments/available_slots', [AppointmentController::class, 'getAvailableTimeSlots']);
+        Route::post('doctors/{id}/appointments/book', [AppointmentController::class, 'bookAppointment']);
+        Route::get('/patient/{status?}/appointments', [AppointmentController::class, 'getAppointmentsForPatient']);
     });
+
 
 
     Route::group(['prefix' => 'auth'], function () {

@@ -29,7 +29,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             SpecializationSeeder::class,  // Seed specializations first
             DoctorSeeder::class,
-            PatientSeeder::class,          // Seed doctors after
+            PatientSeeder::class,
+            ReviewSeeder::class,        // Seed doctors after
         ]);
     }
 }

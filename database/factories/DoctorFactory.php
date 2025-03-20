@@ -28,6 +28,12 @@ class DoctorFactory extends Factory
             'user_id' => User::factory()->create([
                 'role' => 'doctor'
             ]),  // Associate a user to the doctor using the User factory
+
+            'price' => $this->faker->numberBetween(100, 500),
+
+
+
+
             // 'user_role' => function(array $attributes){
             //     User::find($attributes['user_id'])->role;
             // }
