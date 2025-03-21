@@ -41,4 +41,16 @@ class ScheduleController extends Controller
             'message' => 'Schedules created successfully.'
         ], 201);
     }
+
+    public function show(Request $request)
+    {
+        $doctorId = $request->user()->doctor->id; // Get the authenticated doctor's ID
+
+        $schedules = Schedule::where('doctor_id', $doctorId)->get();
+
+        return response()->json([
+            'status' => 'success',
+            'schedules' => $schedules
+        ]);
+    }
 }

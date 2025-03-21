@@ -11,6 +11,9 @@ class Appointment extends Model
 
     protected $fillable = ['doctor_id', 'patient_id', 'appointment_date', 'appointment_time', 'status'];
 
+    protected $appends = [
+        'day',
+    ];
     public function doctor()
     {
         return $this->belongsTo(Doctor::class);
@@ -19,5 +22,10 @@ class Appointment extends Model
     public function patient()
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    public function getDayAttribute()
+    {
+        return date('l', strtotime($this->appointment_date));
     }
 }

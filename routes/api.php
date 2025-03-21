@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Auth\PatientRegisterController;
 use App\Http\Controllers\Api\DoctorController;
 use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\PatientController as ControllersPatientController;
 use App\Http\Controllers\PostFolder\PostController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ScheduleController;
@@ -80,10 +81,21 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
 
     // Doctor Routes
     Route::group(['middleware' => 'role_verifier:doctor'], function () {
+        // Home Page 
+        Route::get('doctor/home', [DoctorController::class, 'index']);
+
+
         // Specializations
         Route::get('specializations', [SpecializationController::class, 'getAllSpecialization']);
         Route::get('get_doctors_by_specialization_name', [SpecializationController::class, 'getDoctorBySpecializationName']);
+
+        // Schedules 
         Route::post('schedules/create', [ScheduleController::class, 'store']);
+        Route::get('schedules', [ScheduleController::class, 'show']);
+
+        // Appointments
+        Route::get('doctor/appointments', [AppointmentController::class, "getDoctorAppointments"]);
+        // Route::
     });
 
 
@@ -97,6 +109,7 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
 
     // Patient
     Route::group(['middleware' => 'role_verifier:patient'], function () {
+        // Patient Reviews
         Route::get('doctors/{id}/reviews', [ReviewController::class, 'getDoctorReviews']);
         Route::get('doctors/{id}/reviews/create', [ReviewController::class, 'store']);
         Route::post('reviews/{id}/update', [ReviewController::class, 'update']);
@@ -108,7 +121,16 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
         Route::get('doctors/{id}/appointments/available_slots', [AppointmentController::class, 'getAvailableTimeSlots']);
         Route::post('doctors/{id}/appointments/book', [AppointmentController::class, 'bookAppointment']);
         Route::get('/patient/{status?}/appointments', [AppointmentController::class, 'getAppointmentsForPatient']);
+        Route::patch('patient/{appointmentId}/cancel', [AppointmentController::class, 'cancelAppointment']);
+
+        // Patient Detail
+        Route::get('/patient/details', [ControllersPatientController::class, 'show']);
+        Route::post('/patient/details', [ControllersPatientController::class, 'store']);
+        Route::post('/patient/details/update', [ControllersPatientController::class, 'update']);
     });
+
+
+
 
 
 

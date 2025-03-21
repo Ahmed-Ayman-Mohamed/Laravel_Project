@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\ApiResponseTrait;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AppointmentResource;
 use App\Http\Resources\DoctorResource;
 use App\Http\Resources\PatientResource;
+use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -67,5 +69,37 @@ class DoctorController extends Controller
         $doctor = Doctor::with('user')->findOrFail($id);
 
         return $this->successResponse(new DoctorResource($doctor->user));
+    }
+
+
+    // Homepage
+    public function index(Request $request)
+    { {
+            $doctorId = $request->user()->doctor->id; // Get authenticated doctor ID
+
+            // Get total number of appointments
+            $totalAppointments = Appointment::where('doctor_id', $doctorId)->count();
+
+            // Get count of appointments by status
+            $pendingAppointmentsCount = Appointment::where('doctor_id', $doctorId)->where('status', 'pending')->count();
+            $canceledAppointmentsCount = Appointment::where('doctor_id', $doctorId)->where('status', 'cancelled')->count();
+            $completedAppointmentsCount = Appointment::where('doctor_id', $doctorId)->where('status', 'confirmed')->count();
+
+            // Get all pending appointments
+            $pendingAppointments = Appointment::where('doctor_id', $doctorId)
+                ->where('status', 'pending')
+                ->orderBy('appointment_date', 'asc')
+                ->orderBy('appointment_time', 'asc')
+                ->get();
+
+            return response()->json([
+                'status' => 'success',
+                'total_appointments' => $totalAppointments,
+                'pending_appointments_count' => $pendingAppointmentsCount,
+                'canceled_appointments_count' => $canceledAppointmentsCount,
+                'completed_appointments_count' => $completedAppointmentsCount,
+                'pending_appointments' => AppointmentResource::collection($pendingAppointments)
+            ]);
+        }
     }
 }
