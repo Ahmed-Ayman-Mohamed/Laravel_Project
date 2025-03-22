@@ -109,6 +109,11 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
 
     // Patient
     Route::group(['middleware' => 'role_verifier:patient'], function () {
+
+        // Home page
+        Route::get('patient/home', [ControllersPatientController::class, 'index']);
+
+
         // Patient Reviews
         Route::get('doctors/{id}/reviews', [ReviewController::class, 'getDoctorReviews']);
         Route::get('doctors/{id}/reviews/create', [ReviewController::class, 'store']);

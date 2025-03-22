@@ -19,6 +19,7 @@ class PatientDetailResource extends JsonResource
             'patient_id' => $this->patient_id,
             'name' => $this->name,
             'age' => $this->age,
+            'phone' => $this->patient->user->phone,
             'message' => $this->message,
             // 'image' => $this->image ? asset('storage/' . $this->image) : null, // Full image URL
             'created_at' => $this->created_at->toDateTimeString(),

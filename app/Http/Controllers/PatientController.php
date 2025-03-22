@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\PatientAppointmentResource;
 use App\Http\Resources\PatientDetailResource;
+use App\Models\Appointment;
 use App\Models\PatientDetail;
+use App\Models\Specialization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -109,6 +112,23 @@ class PatientController extends Controller
             'status' => 'success',
             'message' => 'Patient details updated successfully.',
             'patient_detail' => new PatientDetailResource($patientDetail),
+        ]);
+    }
+
+    public function index(Request $request)
+    {
+        $patientId = $request->user()->patient->id; // Get authenticated patient ID
+
+        $appointments = Appointment::where('patient_id', $patientId)
+            ->where('status', 'pending') // Filter only pending appointments
+            ->get();
+
+        $specializations = Specialization::all();
+
+        return response()->json([
+            'status' => 'success',
+            'pending_appointments' => PatientAppointmentResource::collection($appointments),
+            'specializations' => $specializations
         ]);
     }
 }
