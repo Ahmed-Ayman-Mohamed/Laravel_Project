@@ -24,6 +24,11 @@ class Appointment extends Model
         return $this->belongsTo(Patient::class);
     }
 
+    public function treatmentPlan()
+    {
+        return $this->belongsTo(TreatmentPlan::class);
+    }
+
     public function getDayAttribute()
     {
         return date('l', strtotime($this->appointment_date));

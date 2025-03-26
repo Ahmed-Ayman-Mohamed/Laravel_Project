@@ -11,6 +11,7 @@ use App\Http\Controllers\PostFolder\PostController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SpecializationController;
+use App\Http\Controllers\TreatmentPlanController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -96,6 +97,15 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
         // Appointments
         Route::get('doctor/appointments', [AppointmentController::class, "getDoctorAppointments"]);
         // Route::
+
+
+        // Profile
+        Route::get('doctor/patient_list', [DoctorController::class, "getDoctorPatients"]);
+        Route::get('/doctor/patient_list/{id}', [DoctorController::class, 'getPatientById']);
+
+        // Treatment Plan
+        Route::get('/doctor/patient/{id}/treatment-plans', [TreatmentPlanController::class, 'getPatientTreatmentPlans']);
+        Route::post('/doctor/patient/{id}/treatment-plans/create', [TreatmentPlanController::class, 'createTreatmentPlan']);
     });
 
 

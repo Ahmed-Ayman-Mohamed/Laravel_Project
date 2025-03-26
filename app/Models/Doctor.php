@@ -57,6 +57,11 @@ class Doctor extends Authenticatable implements JWTSubject
         return $this->hasMany(Schedule::class);
     }
 
+    public function treatmentPlans()
+    {
+        return $this->hasMany(TreatmentPlan::class);
+    }
+
     public function getAverageRatingAttribute()
     {
         return round($this->reviews()->avg('rating'), 2);
@@ -110,5 +115,45 @@ class Doctor extends Authenticatable implements JWTSubject
         }
 
         return $query;
+    }
+
+    public function getAllAvailableDays()
+    {
+        // Get current date
+        $currentDate = date('Y-m-d');
+
+        // Get the doctor's available working days from schedule
+        $schedules = Schedule::where('doctor_id', $this->id)
+            ->pluck('available_days')
+            ->toArray();
+
+        if (empty($schedules)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Doctor has no available schedule.'
+            ], 404);
+        }
+
+        $schedules = array_map('strtolower', $schedules); // Ensure lowercase for comparison
+
+        $availableDays = [];
+        $daysChecked = 0;
+
+        while (count($availableDays) < 10) { // Keep checking until we get 10 available days
+            $date = date('Y-m-d', strtotime("+$daysChecked days", strtotime($currentDate))); // Get next days
+            $dayName = strtolower(date('l', strtotime($date))); // Get day name
+
+            // Check if this day is in the doctor's schedule
+            if (in_array($dayName, $schedules)) {
+                $availableDays[] = [
+                    'date' => $date,
+                    'day' => ucfirst($dayName)
+                ];
+            }
+
+            $daysChecked++; // Move to the next day
+        }
+
+        return $availableDays;
     }
 }

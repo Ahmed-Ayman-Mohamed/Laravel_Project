@@ -3,13 +3,63 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\AppointmentResource;
+use App\Http\Resources\PatientAppointmentResource;
 use App\Models\Appointment;
 use App\Models\Schedule;
+use App\Models\TreatmentPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AppointmentController extends Controller
 {
+    // public function bookAppointment(Request $request, $id)
+    // {
+    //     $request->validate([
+    //         'appointment_date' => 'required|date',
+    //         'appointment_time' => 'required|date_format:H:i'
+    //     ]);
+
+    //     // Get doctor's schedule for that day
+    //     $dayOfWeek = date('l', strtotime($request->appointment_date));
+    //     $schedule = Schedule::where('doctor_id', $id)
+    //         ->where('available_days', $dayOfWeek) // Direct match instead of FIND_IN_SET
+    //         ->first();
+
+    //     if (!$schedule) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Doctor is not available on this day.'
+    //         ], 404);
+    //     }
+
+    //     // Ensure the slot is still available
+    //     $exists = Appointment::where('doctor_id', $id)
+    //         ->whereDate('appointment_date', $request->appointment_date)
+    //         ->where('appointment_time', $request->appointment_time)
+    //         ->where('status', '!=', 'cancelled')
+    //         ->exists();
+
+    //     if ($exists) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'This time slot is already booked.'
+    //         ], 422);
+    //     }
+
+    //     // Create appointment
+    //     Appointment::create([
+    //         'doctor_id' => $id,
+    //         'patient_id' => $request->user()->patient->id,
+    //         'appointment_date' => $request->appointment_date,
+    //         'appointment_time' => $request->appointment_time
+    //     ]);
+
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'message' => 'Appointment booked successfully.'
+    //     ]);
+    // }
+
     public function bookAppointment(Request $request, $id)
     {
         $request->validate([
@@ -20,7 +70,7 @@ class AppointmentController extends Controller
         // Get doctor's schedule for that day
         $dayOfWeek = date('l', strtotime($request->appointment_date));
         $schedule = Schedule::where('doctor_id', $id)
-            ->where('available_days', $dayOfWeek) // Direct match instead of FIND_IN_SET
+            ->where('available_days', $dayOfWeek)
             ->first();
 
         if (!$schedule) {
@@ -44,19 +94,30 @@ class AppointmentController extends Controller
             ], 422);
         }
 
-        // Create appointment
+        // Create Treatment Plan
+        $treatmentPlan = TreatmentPlan::create([
+            'doctor_id' => $id,
+            'patient_id' => $request->user()->patient->id,
+            'name' => 'Check Up', // Default name
+            'status' => false, // Default status
+            'date' => $request->appointment_date
+        ]);
+
+        // Create Appointment and link the Treatment Plan
         Appointment::create([
             'doctor_id' => $id,
             'patient_id' => $request->user()->patient->id,
             'appointment_date' => $request->appointment_date,
-            'appointment_time' => $request->appointment_time
+            'appointment_time' => $request->appointment_time,
+            'treatment_plan_id' => $treatmentPlan->id, // Link treatment plan
         ]);
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Appointment booked successfully.'
+            'message' => 'Appointment booked successfully, and treatment plan created.'
         ]);
     }
+
 
     public function getAvailableTimeSlots(Request $request, $doctorId)
     {
@@ -116,15 +177,21 @@ class AppointmentController extends Controller
 
         return response()->json([
             'status' => 'success',
-            $status . '_appointments' => $appointments
+            $status . '_appointments' => PatientAppointmentResource::collection($appointments)
         ]);
     }
 
     public function getDoctorAppointments(Request $request)
     {
         $doctorId = $request->user()->doctor->id; // Get the authenticated doctor's ID
+        $query = Appointment::where('doctor_id', $doctorId);
 
-        $appointments = Appointment::where('doctor_id', $doctorId)
+        // Filter by date if provided
+        if ($request->has('date')) {
+            $query->whereDate('appointment_date', $request->query('date'));
+        }
+
+        $appointments = $query
             ->orderBy('appointment_date', 'asc')
             ->orderBy('appointment_time', 'asc')
             ->get();
@@ -134,6 +201,7 @@ class AppointmentController extends Controller
             'appointments' => AppointmentResource::collection($appointments)
         ]);
     }
+
 
     public function cancelAppointment(Request $request, $appointmentId)
     {

@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('appointments', function (Blueprint $table) {
+        Schema::create('treatment_plans', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('doctor_id');
             $table->unsignedBigInteger('patient_id');
-            $table->enum('status', ['pending', 'confirmed', 'cancelled'])->default('pending');
-            $table->date('appointment_date');
-            $table->time('appointment_time');
+            $table->string('name');
+            $table->date('date');
+            $table->boolean('status')->default(false); // Default status is false (not completed)
             $table->timestamps();
 
             // Foreign Keys
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('appointments');
+        Schema::dropIfExists('treatment_plans');
     }
 };
