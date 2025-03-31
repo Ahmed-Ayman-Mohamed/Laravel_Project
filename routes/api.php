@@ -96,7 +96,7 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
 
         // Appointments
         Route::get('doctor/appointments', [AppointmentController::class, "getDoctorAppointments"]);
-        // Route::
+        Route::get('doctor/appointments/{id}/detail', [AppointmentController::class, "getDoctorAppointmentDetails"]);
 
 
         // Profile
@@ -106,6 +106,8 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
         // Treatment Plan
         Route::get('/doctor/patient/{id}/treatment-plans', [TreatmentPlanController::class, 'getPatientTreatmentPlans']);
         Route::post('/doctor/patient/{id}/treatment-plans/create', [TreatmentPlanController::class, 'createTreatmentPlan']);
+        Route::delete('doctor/treatment-plans/{id}', [TreatmentPlanController::class, 'deleteTreatmentPlan']);
+        Route::put('/doctor/treatment-plans/{id}', [TreatmentPlanController::class, 'updateTreatmentPlan']);
     });
 
 

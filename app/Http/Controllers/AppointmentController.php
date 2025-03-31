@@ -228,4 +228,45 @@ class AppointmentController extends Controller
             'message' => 'Appointment cancelled successfully.'
         ]);
     }
+
+    public function getDoctorAppointmentDetails(Request $request, $appointmentId)
+    {
+        $doctor = $request->user()->doctor; // Get authenticated doctor
+
+        $appointment = Appointment::with(['patient.detail', 'treatmentPlan'])
+            ->where('doctor_id', $doctor->id) // Ensure it's this doctor's appointment
+            ->find($appointmentId);
+
+        if (!$appointment) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Appointment not found or unauthorized access.'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'appointment' => [
+                'id' => $appointment->id,
+                'patient' => [
+                    'id' => $appointment->patient->id,
+                    'name' => $appointment->patient->detail->name ?? 'N/A',
+                    'age' => $appointment->patient->detail->age ?? 'N/A',
+                    'phone' => $appointment->patient->user->phone ?? 'N/A',
+                    'email' => $appointment->patient->user->email ?? 'N/A',
+                ],
+                'appointment_date' => $appointment->appointment_date,
+                'appointment_time' => $appointment->appointment_time,
+                'day' => $appointment->day,
+                'estimate_duration' => '30 min',
+                'status' => $appointment->status,
+                'treatment_plan' => $appointment->treatmentPlan ? [
+                    'id' => $appointment->treatmentPlan->id,
+                    'name' => $appointment->treatmentPlan->name,
+                    'status' => $appointment->treatmentPlan->status ? 'completed' : 'pending',
+                    'date' => $appointment->treatmentPlan->date,
+                ] : null,
+            ]
+        ]);
+    }
 }

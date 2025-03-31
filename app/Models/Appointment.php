@@ -9,7 +9,7 @@ class Appointment extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['doctor_id', 'patient_id', 'appointment_date', 'appointment_time', 'status'];
+    protected $fillable = ['doctor_id', 'patient_id', 'treatment_plan_id', 'appointment_date', 'appointment_time', 'status'];
 
     protected $appends = [
         'day',

@@ -28,7 +28,7 @@ class TreatmentPlan extends Model
         return $this->belongsTo(Patient::class);
     }
 
-    public function appointments()
+    public function appointment()
     {
         return $this->hasMany(Appointment::class);
     }

@@ -75,6 +75,23 @@ class TreatmentPlanController extends Controller
             ], 422);
         }
 
+        // Get the first appointment's time
+        $appointmentTime = $firstAppointment->appointment_time;
+
+        // Check if the requested appointment time is available on this date
+        $isSlotTaken = Appointment::where('doctor_id', $doctorId)
+            ->whereDate('appointment_date', $request->date)
+            ->where('appointment_time', $appointmentTime)
+            ->where('status', '!=', 'cancelled') // Ignore cancelled appointments
+            ->exists();
+
+        if ($isSlotTaken) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'The selected appointment time is already booked on this date.',
+            ], 422);
+        }
+
         // Create the treatment plan
         $treatmentPlan = TreatmentPlan::create([
             'doctor_id' => $doctorId,
@@ -84,12 +101,13 @@ class TreatmentPlanController extends Controller
             'status' => $request->status ?? false, // Default status to false if not provided
         ]);
 
-        // Create a new appointment using the first appointment's time
+
+        // Create a new appointment with the same time as the first appointment
         $appointment = Appointment::create([
             'doctor_id' => $doctorId,
             'patient_id' => $patientId,
             'appointment_date' => $request->date, // Use treatment plan date
-            'appointment_time' => $firstAppointment->appointment_time, // Use first appointment's time
+            'appointment_time' => $appointmentTime, // Use first appointment's time
             'status' => 'pending', // Default to pending
             'treatment_plan_id' => $treatmentPlan->id, // Associate with the treatment plan
         ]);
@@ -100,5 +118,79 @@ class TreatmentPlanController extends Controller
             'treatment_plan' => $treatmentPlan,
             'appointment' => $appointment
         ], 201);
+    }
+
+    public function deleteTreatmentPlan(Request $request, $treatmentPlanId)
+    {
+        $doctor = $request->user()->doctor; // Get the authenticated doctor
+
+        // Find the treatment plan and ensure the doctor is authorized
+        $treatmentPlan = TreatmentPlan::where('id', $treatmentPlanId)
+            ->where('doctor_id', $doctor->id) // Ensure the doctor owns it
+            ->first();
+
+        if (!$treatmentPlan) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Treatment plan not found or unauthorized access.'
+            ], 404);
+        }
+
+        // Delete the treatment plan
+        $treatmentPlan->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Treatment plan deleted successfully.'
+        ]);
+    }
+
+    public function updateTreatmentPlan(Request $request, $id)
+    {
+        $doctor = $request->user()->doctor; // Get authenticated doctor
+
+        // Validate request data (all fields are optional)
+        $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'date' => 'sometimes|date',
+            'status' => 'sometimes|boolean',
+        ]);
+
+        // Find the treatment plan and ensure it belongs to the authenticated doctor
+        $treatmentPlan = TreatmentPlan::where('doctor_id', $doctor->id)->find($id);
+
+        if (!$treatmentPlan) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Treatment plan not found or unauthorized access.',
+            ], 404);
+        }
+
+        // Update only the provided fields
+        if ($request->has('name')) {
+            $treatmentPlan->name = $request->name;
+        }
+        if ($request->has('date')) {
+            $treatmentPlan->date = $request->date;
+
+            // Update the related appointment date if it exists
+            $appointment = Appointment::where('treatment_plan_id', $treatmentPlan->id)->first();
+            if ($appointment) {
+                $appointment->appointment_date = $request->date;
+                $appointment->save();
+            }
+        }
+        if ($request->has('status')) {
+            $treatmentPlan->status = $request->status;
+        }
+
+        // Save the updated treatment plan
+        $treatmentPlan->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Treatment plan updated successfully.',
+            'treatment_plan' => $treatmentPlan
+        ]);
     }
 }
