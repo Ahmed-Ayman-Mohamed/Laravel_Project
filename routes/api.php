@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\PatientController as ControllersPatientController;
 use App\Http\Controllers\PostFolder\PostController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SpecializationController;
@@ -102,6 +103,7 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
         // Profile
         Route::get('doctor/patient_list', [DoctorController::class, "getDoctorPatients"]);
         Route::get('/doctor/patient_list/{id}', [DoctorController::class, 'getPatientById']);
+        Route::put('/doctor/profile/edit', [ProfileController::class, 'updateDoctorProfile']);
 
         // Treatment Plan
         Route::get('/doctor/patient/{id}/treatment-plans', [TreatmentPlanController::class, 'getPatientTreatmentPlans']);
