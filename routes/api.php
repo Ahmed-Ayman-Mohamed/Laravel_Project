@@ -6,13 +6,17 @@ use App\Http\Controllers\Api\Auth\PatientRegisterController;
 use App\Http\Controllers\Api\DoctorController;
 use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\PatientController as ControllersPatientController;
 use App\Http\Controllers\PostFolder\PostController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SpecializationController;
 use App\Http\Controllers\TreatmentPlanController;
+use App\Http\Controllers\XrayController;
+use App\Http\Requests\ForgotPasswordRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -23,7 +27,7 @@ Route::get('/user', function (Request $request) {
 
 
 Route::get('/hi', function () {
-    return 'Hello';
+    return 'Hello hello';
 });
 
 // Route::group(['prefix' => 'auth/{role?}'], function () {
@@ -37,6 +41,9 @@ Route::group(['prefix' => 'auth'], function () {
 
 Route::group(['prefix' => 'auth'], function () {
     Route::post('login', [AuthController::class, 'login']);
+    Route::post('forgot-password', [ForgotPasswordController::class, 'forgotPassword']);
+    Route::post('forgot-password/code', [ForgotPasswordController::class, 'otpChecking']);
+    Route::post('reset-password', [ResetPasswordController::class, 'resetPassword']);
 });
 
 
@@ -59,6 +66,7 @@ Route::group(['prefix' => 'auth'], function () {
 Route::get('patients', [DoctorController::class, 'getAllPatients']);
 Route::get('doctors', [DoctorController::class, 'getAllDoctors']);
 Route::get('doctors/filter', [DoctorController::class, 'filter']);
+Route::get('run-db-seed', [DoctorController::class, 'runCommand']);
 
 
 
@@ -76,7 +84,8 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
 
 
 
-
+    Route::put('profile/edit', [ProfileController::class, 'updateProfile']);
+    Route::post('/profile/change-password', [ProfileController::class, 'changePassword']);
 
 
 
@@ -103,7 +112,6 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
         // Profile
         Route::get('doctor/patient_list', [DoctorController::class, "getDoctorPatients"]);
         Route::get('/doctor/patient_list/{id}', [DoctorController::class, 'getPatientById']);
-        Route::put('/doctor/profile/edit', [ProfileController::class, 'updateDoctorProfile']);
 
         // Treatment Plan
         Route::get('/doctor/patient/{id}/treatment-plans', [TreatmentPlanController::class, 'getPatientTreatmentPlans']);
@@ -130,7 +138,7 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
 
         // Patient Reviews
         Route::get('doctors/{id}/reviews', [ReviewController::class, 'getDoctorReviews']);
-        Route::get('doctors/{id}/reviews/create', [ReviewController::class, 'store']);
+        Route::post('doctors/{id}/reviews/create', [ReviewController::class, 'store']);
         Route::post('reviews/{id}/update', [ReviewController::class, 'update']);
         Route::post('reviews/{id}/delete', [ReviewController::class, 'destroy']);
 
@@ -146,6 +154,16 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
         Route::get('/patient/details', [ControllersPatientController::class, 'show']);
         Route::post('/patient/details', [ControllersPatientController::class, 'store']);
         Route::post('/patient/details/update', [ControllersPatientController::class, 'update']);
+
+        // Patient Treatmentplan
+        Route::get('/patient/treatment-plans', [TreatmentPlanController::class, 'getAuthPatientTreatmentPlans']);
+
+        // X-Ray
+
+        Route::post('/xray/upload', [XrayController::class, 'uploadXray']);
+        Route::get('/patient/xrays', [XrayController::class, 'getAuthPatientXrays']);
+        Route::post('/xray/reupload/{id}', [XrayController::class, 'reuploadXrayImage']);
+        Route::get('/patient/xray/{id}', [XrayController::class, 'showXrayById']);
     });
 
 
