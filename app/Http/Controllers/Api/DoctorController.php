@@ -13,6 +13,7 @@ use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\Schedule;
+use App\Models\Specialization;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -31,11 +32,13 @@ class DoctorController extends Controller
     }
     public function userSpecialization(Request $request)
     {
-        $user = $request->user();
-        $user = User::with('doctor.specializations')->find($user->id);
-        $doctor = $user->doctor;
+        // $user = $request->user();
+        // $user = User::with('doctor.specializations')->find($user->id);
+        // $doctor = $user->doctor;
+
+        $specializations = Specialization::get();
         return response()->json([
-            'doctor' => $user,
+            'specializations' => $specializations,
         ]);
     }
     public function getAllDoctors()
@@ -45,7 +48,13 @@ class DoctorController extends Controller
     }
     public function getAllPatients()
     {
-        $users = User::where('role', 'patient')->get(); // patients
+        $patients = Patient::get(); // patients
+        $users = [];
+        foreach ($patients as $patient) {
+            $user = $patient->user;
+            $users[] = $user;
+        }
+
         return $this->successResponse(PatientResource::collection($users));
     }
 
@@ -187,6 +196,29 @@ class DoctorController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Database seeding executed successfully.',
+        ]);
+    }
+    // Doctor Search
+    public function patientSearchForDoctor(Request $request)
+    {
+        $searchItem = $request->query('search', '');
+
+        if ($searchItem == '') {
+            return response()->json([
+                'doctors' => []
+            ]);
+        }
+
+        $doctors = Doctor::search($searchItem)->get();
+        $users = [];
+
+        foreach ($doctors as $doctor) {
+            $user = $doctor->user;
+            $users[] = $user;
+        }
+
+        return response()->json([
+            'doctors' => DoctorResource::collection($users),
         ]);
     }
 }

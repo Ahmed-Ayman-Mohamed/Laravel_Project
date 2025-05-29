@@ -27,7 +27,7 @@ Route::get('/user', function (Request $request) {
 
 
 Route::get('/hi', function () {
-    return 'Hello hello';
+    return 'Hello';
 });
 
 // Route::group(['prefix' => 'auth/{role?}'], function () {
@@ -67,7 +67,8 @@ Route::get('patients', [DoctorController::class, 'getAllPatients']);
 Route::get('doctors', [DoctorController::class, 'getAllDoctors']);
 Route::get('doctors/filter', [DoctorController::class, 'filter']);
 Route::get('run-db-seed', [DoctorController::class, 'runCommand']);
-
+// Create List of Specialization
+Route::post('/speciazliation/create/list', [SpecializationController::class, 'createSpecializationsList']);
 
 
 
@@ -96,6 +97,11 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
         Route::get('doctor/home', [DoctorController::class, 'index']);
 
 
+
+        // Xray
+        Route::get('doctor/patient/{id}/xrays', [XrayController::class, "getDoctorPatientXrays"]);
+        Route::get('doctor/xray/{id}', [XrayController::class, "showXrayByIdForDoctor"]);
+
         // Specializations
         Route::get('specializations', [SpecializationController::class, 'getAllSpecialization']);
         Route::get('get_doctors_by_specialization_name', [SpecializationController::class, 'getDoctorBySpecializationName']);
@@ -107,11 +113,13 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
         // Appointments
         Route::get('doctor/appointments', [AppointmentController::class, "getDoctorAppointments"]);
         Route::get('doctor/appointments/{id}/detail', [AppointmentController::class, "getDoctorAppointmentDetails"]);
-
+        Route::get('doctor/appointments/{id}/reservation/detail', [AppointmentController::class, "getDoctorAppointmentPaymentDetails"]);
 
         // Profile
         Route::get('doctor/patient_list', [DoctorController::class, "getDoctorPatients"]);
         Route::get('/doctor/patient_list/{id}', [DoctorController::class, 'getPatientById']);
+        Route::get('/doctor/patient/{id}/appointments', [AppointmentController::class, 'getDoctorPatientUpcomingAppointments']);
+
 
         // Treatment Plan
         Route::get('/doctor/patient/{id}/treatment-plans', [TreatmentPlanController::class, 'getPatientTreatmentPlans']);
@@ -119,7 +127,6 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
         Route::delete('doctor/treatment-plans/{id}', [TreatmentPlanController::class, 'deleteTreatmentPlan']);
         Route::put('/doctor/treatment-plans/{id}', [TreatmentPlanController::class, 'updateTreatmentPlan']);
     });
-
 
 
 
@@ -164,6 +171,9 @@ Route::group(['middleware' => ['jwt_verifier:api']], function () {
         Route::get('/patient/xrays', [XrayController::class, 'getAuthPatientXrays']);
         Route::post('/xray/reupload/{id}', [XrayController::class, 'reuploadXrayImage']);
         Route::get('/patient/xray/{id}', [XrayController::class, 'showXrayById']);
+
+        // Search
+        Route::get('/patient/doctor/search', [DoctorController::class, 'patientSearchForDoctor']);
     });
 
 
